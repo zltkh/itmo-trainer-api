@@ -13,8 +13,9 @@ func TestEmptyGetUser(t *testing.T) {
 }
 
 func TestGetUserNotFound(t *testing.T) {
-	response := GetUser("notFoundId")
+	response := GetUser("notFoundUserId")
 	if response.StatusCode != http.StatusNotFound {
 		t.Error("Expected status code 404, got", response.StatusCode)
 	}
+	t.Log(response.Body)
 }

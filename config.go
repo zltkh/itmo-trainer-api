@@ -3,21 +3,21 @@ package itmoTrainerApi
 import "os"
 
 func GetAPIKEY() string {
-	return os.Getenv("ITMO-TRAINER-API-APIKEY")
+	return os.Getenv("ITMO_TRAINER_API_APIKEY")
 }
 
 func GetDBNAME() string {
-	return os.Getenv("ITMO-TRAINER-API-DBNAME")
+	return os.Getenv("ITMO_TRAINER_API_DBNAME")
 }
 
 func GetDBUSER() string {
-	return os.Getenv("ITMO-TRAINER-API-DBUSER")
+	return os.Getenv("ITMO_TRAINER_API_DBUSER")
 }
 
 func GetDBPASSWORD() string {
-	return os.Getenv("ITMO-TRAINER-API-DBPASSWORD")
+	return os.Getenv("ITMO_TRAINER_API_DBPASSWORD")
 }
 
 func GetDBHOST() string {
-	return os.Getenv("ITMO-TRAINER-API-DBHOST")
+	return os.Getenv("ITMO_TRAINER_API_DBHOST")
 }
