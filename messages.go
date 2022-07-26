@@ -17,6 +17,19 @@ type message struct {
 	Checked   bool   `json:"checked" db:"checked"`
 }
 
+func (m *message) load(id string) error {
+	db, err := getConnection()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	err = db.Get(m, "SELECT * FROM contestMessages WHERE `id` = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func messageExists(id string) (bool, error) {
 	db, err := getConnection()
 	if err != nil {
@@ -246,7 +259,7 @@ func sendMessage(apiKey, contestId, fromId, toId, text string, adminMode bool) A
 	return ok()
 }
 
-func checkMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayResponse {
+func CheckMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayResponse {
 	// checking empty parameters
 	needCheckParams := map[string]string{
 		"apiKey":    apiKey,
@@ -279,11 +292,18 @@ func checkMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayRe
 	} else if !exists {
 		return notFoundCustomText(fmt.Sprintf("Message %s is not exists", messageId))
 	}
+	var m message
+	if err := m.load(messageId); err != nil {
+		return internalError(err)
+	}
+	if m.ToId != userId && !adminMode {
+		return accessDenied()
+	}
 	db, err := getConnection()
 	if err != nil {
 		return internalError(err)
 	}
-	_, err = db.Exec("UPDATE `contestMessages` SET `checked`=1 WHERE `id`=?")
+	_, err = db.Exec("UPDATE `contestMessages` SET `checked`='1' WHERE `id`=?", messageId)
 	if err != nil {
 		return internalError(err)
 	}
