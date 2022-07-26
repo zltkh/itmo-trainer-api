@@ -83,3 +83,5 @@ func userExists(id string) (bool, error) {
 	}
 	return cnt == 1, nil
 }
+
+// commento
