@@ -310,7 +310,7 @@ func CheckMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayRe
 	return ok()
 }
 
-func CheckAllChat(apiKey, contestId, userId string, adminMode bool) APIGatewayResponse {
+func CheckChat(apiKey, contestId, userId string, adminMode bool) APIGatewayResponse {
 	// checking empty parameters
 	needCheckParams := map[string]string{
 		"apiKey":    apiKey,
@@ -349,7 +349,7 @@ func CheckAllChat(apiKey, contestId, userId string, adminMode bool) APIGatewayRe
 	if err != nil {
 		return internalError(err)
 	}
-	_, err = db.Exec("UPDATE `contestMessages` SET `checked`='1' WHERE `contestId`=? AND `toId`=?", contestId, userId)
+	_, err = db.Exec("UPDATE `contestMessages` SET `checked`='1' WHERE `contestId`=? AND `fromId`=?", contestId, userId)
 	if err != nil {
 		return internalError(err)
 	}
