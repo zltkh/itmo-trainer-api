@@ -190,7 +190,7 @@ func CountUnreadMessages(apiKey, contestId, userId string, adminMode bool) APIGa
 	return APIGatewayResponse{StatusCode: http.StatusOK, Body: "{\"count\":\"" + res + "\"}"}
 }
 
-func sendMessage(apiKey, contestId, fromId, toId, text string, adminMode bool) APIGatewayResponse {
+func SendMessage(apiKey, contestId, fromId, toId, text string, adminMode bool) APIGatewayResponse {
 	// checking empty parameters
 	needCheckParams := map[string]string{
 		"apiKey":    apiKey,
