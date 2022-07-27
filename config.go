@@ -2,22 +2,22 @@ package itmoTrainerApi
 
 import "os"
 
-func GetAPIKEY() string {
+func getAPIKEY() string {
 	return os.Getenv("ITMO_TRAINER_API_APIKEY")
 }
 
-func GetDBNAME() string {
+func getDBNAME() string {
 	return os.Getenv("ITMO_TRAINER_API_DBNAME")
 }
 
-func GetDBUSER() string {
+func getDBUSER() string {
 	return os.Getenv("ITMO_TRAINER_API_DBUSER")
 }
 
-func GetDBPASSWORD() string {
+func getDBPASSWORD() string {
 	return os.Getenv("ITMO_TRAINER_API_DBPASSWORD")
 }
 
-func GetDBHOST() string {
+func getDBHOST() string {
 	return os.Getenv("ITMO_TRAINER_API_DBHOST")
 }

@@ -14,6 +14,6 @@ type config struct {
 }
 
 func getConnection() (*sqlx.DB, error) {
-	cfg := config{GetDBNAME(), GetDBUSER(), GetDBPASSWORD(), GetDBHOST()}
+	cfg := config{getDBNAME(), getDBUSER(), getDBPASSWORD(), getDBHOST()}
 	return sqlx.Connect("mysql", fmt.Sprintf("%s:%s@(%s)/%s", cfg.user, cfg.password, cfg.host, cfg.dbname))
 }

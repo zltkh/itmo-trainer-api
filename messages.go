@@ -73,7 +73,7 @@ func GetMessagesFromContest(apiKey, contestId, userId string, adminMode bool) AP
 	if err != nil {
 		return internalError(err)
 	}
-	if (adminMode && apiKey != GetAPIKEY()) || (!adminMode && u.Password != apiKey) {
+	if (adminMode && apiKey != getAPIKEY()) || (!adminMode && u.Password != apiKey) {
 		return accessDenied()
 	}
 	if v, err := contestExists(contestId); err != nil {
@@ -165,7 +165,7 @@ func CountUnreadMessages(apiKey, contestId, userId string, adminMode bool) APIGa
 	}
 
 	// checking access to use method
-	if (adminMode && apiKey != GetAPIKEY()) || (!adminMode && u.Password != apiKey) {
+	if (adminMode && apiKey != getAPIKEY()) || (!adminMode && u.Password != apiKey) {
 		return accessDenied()
 	}
 
@@ -233,7 +233,7 @@ func sendMessage(apiKey, contestId, fromId, toId, text string, adminMode bool) A
 	if err != nil {
 		return internalError(err)
 	}
-	if (adminMode && apiKey != GetAPIKEY()) || (!adminMode && u.Password != apiKey) {
+	if (adminMode && apiKey != getAPIKEY()) || (!adminMode && u.Password != apiKey) {
 		return accessDenied()
 	}
 
@@ -283,7 +283,7 @@ func CheckMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayRe
 	if err := u.load(userId); err != nil {
 		return internalError(err)
 	}
-	if (adminMode && apiKey != GetAPIKEY()) || (!adminMode && u.Password != apiKey) {
+	if (adminMode && apiKey != getAPIKEY()) || (!adminMode && u.Password != apiKey) {
 		return accessDenied()
 	}
 
@@ -304,6 +304,52 @@ func CheckMessage(apiKey, userId, messageId string, adminMode bool) APIGatewayRe
 		return internalError(err)
 	}
 	_, err = db.Exec("UPDATE `contestMessages` SET `checked`='1' WHERE `id`=?", messageId)
+	if err != nil {
+		return internalError(err)
+	}
+	return ok()
+}
+
+func CheckAllChat(apiKey, contestId, userId string, adminMode bool) APIGatewayResponse {
+	// checking empty parameters
+	needCheckParams := map[string]string{
+		"apiKey":    apiKey,
+		"contestId": contestId,
+		"userId":    userId,
+	}
+	for k, v := range needCheckParams {
+		if len(v) == 0 {
+			return APIGatewayResponse{
+				StatusCode: http.StatusBadRequest,
+				Body:       "Parameter " + k + " is required",
+			}
+		}
+	}
+
+	// checking is user allowed to edit message
+	if v, err := userExists(userId); err != nil {
+		return internalError(err)
+	} else if !v {
+		return notFoundCustomText(fmt.Sprintf("User %s is not exists", userId))
+	}
+	var u user
+	if err := u.load(userId); err != nil {
+		return internalError(err)
+	}
+	if (adminMode && apiKey != getAPIKEY()) || (!adminMode && u.Password != apiKey) {
+		return accessDenied()
+	}
+
+	if exists, err := contestExists(contestId); err != nil {
+		return internalError(err)
+	} else if !exists {
+		return notFoundCustomText(fmt.Sprintf("Contest %s is not exists", contestId))
+	}
+	db, err := getConnection()
+	if err != nil {
+		return internalError(err)
+	}
+	_, err = db.Exec("UPDATE `contestMessages` SET `checked`='1' WHERE `contestId`=? AND `toId`=?", contestId, userId)
 	if err != nil {
 		return internalError(err)
 	}
