@@ -1,5 +1,7 @@
 package itmoTrainerApi
 
+import "net/http"
+
 type contest struct {
 	Id            string `json:"id" db:"id"`
 	Problemset    string `json:"problemset" db:"problemset"`
@@ -23,4 +25,28 @@ func contestExists(id string) (bool, error) {
 		return false, err
 	}
 	return cnt == 1, nil
+}
+
+func (c *contest) loadContest(contestId string) error {
+	return nil
+}
+
+func GetContest(contestId string) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func GetContestList(apiKey string, showHidden bool) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func EditContest(contestId string, newContest *contest) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func CreateContest(contestId string, newContest *contest) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func DeleteContest(contestId string) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
 }

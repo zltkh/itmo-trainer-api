@@ -29,6 +29,20 @@ func (u *user) getFullName() string {
 	return strings.Trim(u.Surname+" "+u.Name+" "+u.Patronymic, " ")
 }
 
+func userExists(id string) (bool, error) {
+	db, err := getConnection()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+	cnt := 0
+	err = db.Get(&cnt, "SELECT COUNT(`id`) FROM users WHERE `id` = ?", id)
+	if err != nil {
+		return false, err
+	}
+	return cnt == 1, nil
+}
+
 func (u *user) load(id string) error {
 	db, err := getConnection()
 	if err != nil {
@@ -70,18 +84,18 @@ func GetUser(userId string) APIGatewayResponse {
 	}
 }
 
-func userExists(id string) (bool, error) {
-	db, err := getConnection()
-	if err != nil {
-		return false, err
-	}
-	defer db.Close()
-	cnt := 0
-	err = db.Get(&cnt, "SELECT COUNT(`id`) FROM users WHERE `id` = ?", id)
-	if err != nil {
-		return false, err
-	}
-	return cnt == 1, nil
+func UpdateUser(userId string, newUser *user) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
 }
 
-// commento
+func DeleteUser(userId string) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func CreateUser(userId string, newUser *user) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
+
+func ApproveUser(userId string) APIGatewayResponse {
+	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+}
