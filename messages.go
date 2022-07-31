@@ -1,4 +1,4 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 import (
 	"encoding/json"

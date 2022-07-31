@@ -1,4 +1,4 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 type APIGatewayRequest struct {
 	OperationID string `json:"operationId"`

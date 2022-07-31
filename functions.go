@@ -1,4 +1,4 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 func minString(strings ...string) string {
 	mn := strings[0]

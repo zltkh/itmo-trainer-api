@@ -1,4 +1,4 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 import (
 	"encoding/json"
@@ -42,6 +42,12 @@ func (c *contest) load(contestId string) error {
 		return err
 	}
 	return nil
+}
+
+func (c *contest) getParticipants() (map[string]string, error) {
+	res := make(map[string]string)
+	err := json.Unmarshal([]byte(c.Participants), &res)
+	return res, err
 }
 
 func GetContest(contestId string) APIGatewayResponse {
@@ -114,6 +120,18 @@ func CreateContest(newContest *contest) APIGatewayResponse {
 		return internalError(err)
 	}
 	defer db.Close()
+	var problemset []string
+	err = json.Unmarshal([]byte(newContest.Problemset), &problemset)
+	if err != nil {
+		return internalError(err)
+	}
+	for _, val := range problemset {
+		if exists, err := problemExists(val); err != nil {
+			return internalError(err)
+		} else if !exists {
+			return notFoundCustomText("Problem with ID " + val + " not found")
+		}
+	}
 	query := "INSERT INTO `contests`(`problemset`, `start`, `finish`, `disableTheory`, `isPublic`, `participants`, `name`) VALUES (?,?,?,?,?,?,?)"
 	_, err = db.Exec(query, newContest.Problemset, newContest.Start, newContest.Finish, newContest.DisableTheory,
 		newContest.IsPublic, newContest.Participants, newContest.Name)
@@ -140,4 +158,40 @@ func DeleteContest(contestId string) APIGatewayResponse {
 		return internalError(err)
 	}
 	return ok()
+}
+
+func ChangeParticipantState(contestId, userId, state string) APIGatewayResponse {
+	db, err := getConnection()
+	if err != nil {
+		return internalError(err)
+	}
+	defer db.Close()
+	var c contest
+	if exists, err := contestExists(contestId); err != nil {
+		return internalError(err)
+	} else if !exists {
+		return notFoundCustomText("Contest with ID " + contestId + " not found")
+	}
+	if err := c.load(contestId); err != nil {
+		return internalError(err)
+	}
+	participants, err := c.getParticipants()
+	if err != nil {
+		return internalError(err)
+	}
+	if _, ok := participants[userId]; !ok {
+		return notFoundCustomText("User with ID " + userId + " not found")
+	} else {
+		participants[userId] = state
+	}
+	if res, err := json.Marshal(participants); err != nil {
+		return internalError(err)
+	} else {
+		query := "UPDATE `contests` SET `participants`=? WHERE `id`=?"
+		_, err := db.Exec(query, res, contestId)
+		if err != nil {
+			return internalError(err)
+		}
+		return ok()
+	}
 }

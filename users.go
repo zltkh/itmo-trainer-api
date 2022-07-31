@@ -1,4 +1,4 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 import (
 	"encoding/json"
@@ -89,7 +89,22 @@ func UpdateUser(userId string, newUser *user) APIGatewayResponse {
 }
 
 func DeleteUser(userId string) APIGatewayResponse {
-	return APIGatewayResponse{StatusCode: http.StatusNotImplemented}
+	if exists, err := userExists(userId); err != nil {
+		return internalError(err)
+	} else if !exists {
+		return notFound()
+	}
+	db, err := getConnection()
+	if err != nil {
+		return internalError(err)
+	}
+	defer db.Close()
+	query := "DELETE FROM `users` WHERE `id` = ?"
+	_, err = db.Exec(query, userId)
+	if err != nil {
+		return internalError(err)
+	}
+	return ok()
 }
 
 func CreateUser(userId string, newUser *user) APIGatewayResponse {

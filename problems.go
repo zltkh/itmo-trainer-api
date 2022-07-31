@@ -1,8 +1,10 @@
-package itmoTrainerApi
+package itmo_trainer_api
 
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type problem struct {
@@ -42,6 +44,29 @@ func (p *problem) load(problemId string) error {
 	return nil
 }
 
+func (p *problem) check(source, userId, answer string) (problemAttempt, error) {
+	verdict := false
+	var answers []string
+	err := json.Unmarshal([]byte(p.Answers), &answers)
+	if err != nil {
+		return problemAttempt{}, err
+	}
+	for _, ans := range answers {
+		if ans == answer {
+			verdict = true
+			break
+		}
+	}
+	return problemAttempt{
+		ProblemId: p.Id,
+		Answer:    answer,
+		Verdict:   verdict,
+		Time:      strconv.FormatInt(time.Now().Unix(), 10),
+		UserId:    userId,
+		Source:    source,
+	}, nil
+}
+
 func CreateProblem(newProblem *problem) APIGatewayResponse {
 	db, err := getConnection()
 	if err != nil {
@@ -53,7 +78,7 @@ func CreateProblem(newProblem *problem) APIGatewayResponse {
 	if err != nil {
 		return internalError(err)
 	}
-	return APIGatewayResponse{StatusCode: http.StatusOK}
+	return ok()
 }
 
 func GetProblem(problemId string) APIGatewayResponse {
@@ -66,7 +91,7 @@ func GetProblem(problemId string) APIGatewayResponse {
 	if err := p.load(problemId); err != nil {
 		return internalError(err)
 	}
-	if res, err := json.Marshal(p); err != nil {
+	if res, err := json.MarshalIndent(p, "", "    "); err != nil {
 		return internalError(err)
 	} else {
 		return APIGatewayResponse{StatusCode: http.StatusOK, Body: string(res)}
@@ -85,11 +110,11 @@ func EditProblem(problemId string, newProblem *problem) APIGatewayResponse {
 	}
 	defer db.Close()
 	query := "UPDATE `problems` SET `name`=?,`theme`=?,`rating`=?,`answers`=?,`text`=?, `isPublic`=? WHERE id=?"
-	_, err = db.Exec(query, newProblem.Name, newProblem.Theme, newProblem.Rating, newProblem.Answers, newProblem.Text, newProblem.IsPublic, newProblem.Id)
+	_, err = db.Exec(query, newProblem.Name, newProblem.Theme, newProblem.Rating, newProblem.Answers, newProblem.Text, newProblem.IsPublic, problemId)
 	if err != nil {
 		return internalError(err)
 	}
-	return APIGatewayResponse{StatusCode: http.StatusOK}
+	return ok()
 }
 
 func DeleteProblem(problemId string) APIGatewayResponse {
@@ -108,5 +133,5 @@ func DeleteProblem(problemId string) APIGatewayResponse {
 	if err != nil {
 		return internalError(err)
 	}
-	return APIGatewayResponse{StatusCode: http.StatusOK}
+	return ok()
 }
